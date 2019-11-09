@@ -1,11 +1,15 @@
 import random
 
 class RC4():
-    def __init__(self, key,plaintext = None,ciphertext):
+    def __init__(self, key, plaintext = None,ciphertext = None):
         self.keysize = 256 #nice
         self.key = key
-        self.plaintext = plaintext
-        self.ciphertext = ciphertext
+        if plaintext is not None:
+            self.plaintext = plaintext
+            if ciphertext is None:
+                self.ciphertext = [0] * len(plaintext)
+        if ciphertext is not None:
+            self.ciphertext = ciphertext
         self.s = [0] * self.keysize
         #self.KSA() #computes S
         
@@ -24,6 +28,7 @@ class RC4():
 
     
     def PRGA(self):
+        self.ciphertext = [0] * len(self.plaintext)
         i = 0
         j = 0
         leng = len(self.plaintext)
@@ -42,9 +47,12 @@ class RC4():
     
     def run(self, plaintext = None):
         if plaintext is None:
-            self.KSA()
-            self.PRGA()
-            return self.getCiphertext()
+            if self.plaintext is None:
+                print("Nothing to decode")
+            else:
+                self.KSA()
+                self.PRGA()
+                return self.getCiphertext()
         else:
             #print("I'm changing plaintext")
             self.plaintext = plaintext

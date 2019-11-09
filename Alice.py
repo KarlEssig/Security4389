@@ -4,8 +4,9 @@ from Crypto.PublicKey import RSA
 from Crypto.Random import get_random_bytes
 from Crypto.Cipher import PKCS1_OAEP
 import struct
+from RC4 import RC4
 #CONSTANTS
-SYMMETRIC_KEY_SIZE = 16
+SYMMETRIC_KEY_SIZE = 64
 NONCE_SIZE = 6
 
 class Alice():
@@ -31,6 +32,7 @@ class Alice():
         sentnonce = plaintext[:NONCE_SIZE]
         self.symmetricKey = plaintext[NONCE_SIZE:SYMMETRIC_KEY_SIZE+NONCE_SIZE]
         timestamp = plaintext[SYMMETRIC_KEY_SIZE+NONCE_SIZE:]
+        self.nonceAddOne()
         self.validate(timestamp, sentnonce)    
             #respond
         return plaintext
@@ -41,7 +43,7 @@ class Alice():
         #cipher_rsa2 = PKCS1_OAEP.new(self.key)
         
         #preciphertext = cipher_rsa.encrypt(message)
-        ciphertext = cipher_rsa2.encrypt(message) #signed with Alice's private key for mutual authentification
+        ciphertext = cipher_rsa.encrypt(message) #signed with Alice's private key for mutual authentification
         
         return ciphertext
         
@@ -66,6 +68,18 @@ class Alice():
             symmetricKey[i] = selection
         return symmetricKey
         
+    def nonceAddOne(self):
+        newnonce = int.from_bytes(self.nonce, byteorder = 'big') + 1
+        self.nonce = struct.pack(">q", newnonce)
+        self.nonce = self.nonce[2:]
+    
+    def startRC4(self): #possibly input a filestream
+        if self.communicate_flag:
+            rc_cipher = RC4(self.symmetricKey)
+            
+        else:
+            print("Unable to communicate")
+    
     def setRecieverPublic(self, publickey):
         self.recieverpublickey = publickey
         
@@ -83,7 +97,9 @@ class Alice():
         if difftime[0] & 0xFF or difftime[1] & 0xFF or difftime[2] & 0xFF or difftime[3]  > 16:
             print("Could not validate timestamp")
             self.communicate_flag = False
-        if (self.nonce + 1 != sentnonce):
+        #print("NONCES, WHAT IT SHOULD BE: {0} \nWHAT IT IS: {1}".format(self.nonce, sentnonce))
+        if (self.nonce != sentnonce):
+            print("Not equal")
             self.communicate_flag = False
         
 if __name__ == '__main__':

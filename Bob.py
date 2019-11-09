@@ -4,7 +4,7 @@ from Crypto.Cipher import PKCS1_OAEP
 import time
 import struct
 #CONSTANTS
-SYMMETRIC_KEY_SIZE = 16
+SYMMETRIC_KEY_SIZE = 64
 NONCE_SIZE = 6
 
 class Bob():
@@ -29,20 +29,24 @@ class Bob():
     
     def encryptRSA(self):
         if self.communicate_flag:
-            self.nonce = self.nonce + 1
+            self.nonceAddOne()
             timestamp = self.generateTimeStamp()
             message = self.nonce + self.symmetricKey + timestamp
+            print(message)
             cipher_rsa = PKCS1_OAEP.new(self.senderpublickey)
-            #cipher_rsa2 = PKCS1_OAEP.new(self.key)
-            #preciphertext = cipher_rsa.encrypt(message)#For mutual authentication
-            ciphertext = cipher_rsa2.encrypt(message)  
+            ciphertext = cipher_rsa.encrypt(message)  
             return ciphertext
         return -1
         
     def generateTimeStamp(self):
         k = int(time.time())
         bytetime = struct.pack(">i", k)
-        return bytetime    
+        return bytetime
+
+    def nonceAddOne(self):
+        newnonce = int.from_bytes(self.nonce, byteorder = 'big') + 1
+        self.nonce = struct.pack(">q", newnonce)
+        self.nonce = self.nonce[2:]
         
     def setSenderPublic(self, publickey):
         self.senderpublickey = publickey
