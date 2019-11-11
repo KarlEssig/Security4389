@@ -166,11 +166,9 @@ if __name__ == '__main__':
 
     parser.add_option("-a", "--aliceprivate", action="store", dest="alicekeyfile",help="The file where Alice's key has been stored", default = None)
     parser.add_option("-b", "--bobprivate", dest="bobkeyfile", default = None)
-    parser.add_option("-c", "--alicepublic", action="store", dest="alicepublic",help="The file where Alice's key has been stored", default = None)
-    parser.add_option("-d", "--bobpublic", dest="bobpublic", default = None)
-    parser.add_option("--demo", type="int", dest="demo", help="Whether this is running the demo or not", default = 0)
-    #parser.add_option("-p", "--httpPortIndex", type="int",dest="httpPortIndex", default=1200)
-    #parser.add_option("-s", "--streamPortIndex", type="int",dest="streamPortIndex", default=5000)
+    #parser.add_option("-c", "--alicepublic", action="store", dest="alicepublic",help="The file where Alice's key has been stored", default = None)
+    #parser.add_option("-d", "--bobpublic", dest="bobpublic", default = None)
+    parser.add_option("-d", "--demo", type="int", dest="demo", help="Whether this is running the demo or not", default = 0)
     (options, args) = parser.parse_args()
     if options.demo == 0:
         print("Running debug version")
