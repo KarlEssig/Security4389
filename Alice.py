@@ -6,8 +6,8 @@ from Crypto.Cipher import PKCS1_OAEP
 import struct
 from RC4 import RC4
 import array
-#CONSTANTS
-SYMMETRIC_KEY_SIZE = 64
+#CONSTANTS HAS TO BE THE SAME AS BOB.PY
+SYMMETRIC_KEY_SIZE = 16 
 NONCE_SIZE = 6
 BLOCK_SIZE = 65536
 

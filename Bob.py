@@ -5,8 +5,8 @@ import time
 import struct
 from RC4 import RC4
 import array
-#CONSTANTS
-SYMMETRIC_KEY_SIZE = 64
+#CONSTANTS HAS TO BE THE SAME AS ALICE.PY
+SYMMETRIC_KEY_SIZE = 16 
 NONCE_SIZE = 6
 BLOCK_SIZE = 65536
 
@@ -35,7 +35,7 @@ class Bob():
             self.nonceAddOne()
             timestamp = self.generateTimeStamp()
             message = self.nonce + self.symmetricKey + timestamp
-            print(message)
+            #print(message)
             cipher_rsa = PKCS1_OAEP.new(self.senderpublickey)
             ciphertext = cipher_rsa.encrypt(message)  
             return ciphertext
@@ -71,7 +71,7 @@ class Bob():
             
             ciphertext = rc_cipher.run(plaintext[x*BLOCK_SIZE:])
             ciphertext = array.array('B', ciphertext).tobytes()
-            print("RC4 CIPHERTEXT: {0}".format(ciphertext))
+            #print("RC4 CIPHERTEXT: {0}".format(ciphertext))
             out_file.write(ciphertext)
             out_file.close()
         else:
