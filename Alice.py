@@ -5,9 +5,11 @@ from Crypto.Random import get_random_bytes
 from Crypto.Cipher import PKCS1_OAEP
 import struct
 from RC4 import RC4
+import array
 #CONSTANTS
 SYMMETRIC_KEY_SIZE = 64
 NONCE_SIZE = 6
+BLOCK_SIZE = 65536
 
 class Alice():
     def __init__(self, rsaKeyObject):
@@ -73,10 +75,26 @@ class Alice():
         self.nonce = struct.pack(">q", newnonce)
         self.nonce = self.nonce[2:]
     
-    def startRC4(self): #possibly input a filestream
+    def startRC4(self, plaintext, outputfilename): #possibly input a filestream
+        #print("PLAINTEXT OF STREAM: {0}".format(plaintext))
         if self.communicate_flag:
             rc_cipher = RC4(self.symmetricKey)
+            x = 0 #chunk number
+            out_file = open(outputfilename, "wb")
+            while (x+1)* BLOCK_SIZE < len(plaintext):
+                ciphertext = rc_cipher.run(plaintext[x*BLOCK_SIZE:(x+1)*BLOCK_SIZE])
+                ciphertext = array.array('B', ciphertext).tobytes()
+                x = x + 1
+                #print("CIPHERTEXT OF STREAM: {0}".format(ciphertext))
+                out_file.write(ciphertext)
+                #hash ciphertext?
+                #change key?
             
+            ciphertext = rc_cipher.run(plaintext[x*BLOCK_SIZE:])
+            ciphertext = array.array('B', ciphertext).tobytes()
+            #print("RC4 CIPHERTEXT: {0}".format(ciphertext))
+            out_file.write(ciphertext)
+            out_file.close()
         else:
             print("Unable to communicate")
     

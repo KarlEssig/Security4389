@@ -46,26 +46,38 @@ def main():
     bob = Bob(bobkey)
     alice.setRecieverPublic(bobkey.publickey())
     bob.setSenderPublic(alicekey.publickey())
-    #print(alice.toString())
-    #print(bob.toString())
+    
     print("MESSAGE PLAINTEXT - ALICE")
     print(alice.convertForRSA())
+    
     print("MESSAGE CIPHERTEXT - ALICE")
     ciphertext = alice.encryptRSA()
     print(ciphertext)
+    
     plaintext = bob.decryptRSA(ciphertext)
     print("MESSAGE PLAINTEXT - BOB")
     print(plaintext)
     
-    #print(alice.toString())
-    #print(bob.toString())
-    
     ciphertext = bob.encryptRSA()
     print("MESSAGE CIPHERTEXT - BOB")
     print(ciphertext)
+    
     plaintext = alice.decryptRSA(ciphertext)
     print("MESSAGE PLAINTEXT - ALICE")
     print(plaintext)
+    
+    print("START SYMMETRIC ENCRYPTION")
+    inputplaintext = open("StreamCipherInput.bin", "rb")
+    plaintext = inputplaintext.read()
+    alice.startRC4(plaintext, "StreamCipherOutput.bin")
+    inputplaintext.close()
+    
+    print("BOB DECODE")
+    inputciphertext = open("StreamCipherOutput.bin", "rb")
+    ciphertext = inputciphertext.read()
+    bob.startRC4(ciphertext, "BobOutput.bin")
+    inputciphertext.close()
+    
     
 
 if __name__ == '__main__':

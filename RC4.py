@@ -6,8 +6,8 @@ class RC4():
         self.key = key
         if plaintext is not None:
             self.plaintext = plaintext
-            if ciphertext is None:
-                self.ciphertext = [0] * len(plaintext)
+            #if ciphertext is None:
+             #   self.ciphertext = [0] * len(plaintext)
         if ciphertext is not None:
             self.ciphertext = ciphertext
         self.s = [0] * self.keysize
