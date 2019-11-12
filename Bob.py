@@ -5,10 +5,12 @@ import time
 import struct
 from RC4 import RC4
 import array
+from Crypto.Hash import SHA384
 #CONSTANTS HAS TO BE THE SAME AS ALICE.PY
 SYMMETRIC_KEY_SIZE = 16 
 NONCE_SIZE = 6
 BLOCK_SIZE = 65536
+SHA384_SIZE = 48
 
 class Bob():
     def __init__(self, rsaKeyObject):
@@ -60,17 +62,28 @@ class Bob():
             rc_cipher = RC4(self.symmetricKey)
             x = 0 #chunk number
             out_file = open(outputfilename, "wb")
-            while (x+1)* BLOCK_SIZE < len(plaintext):
+            hasher = SHA384.new()
+            while (x+1)* BLOCK_SIZE< len(plaintext):
+                
                 ciphertext = rc_cipher.run(plaintext[x*BLOCK_SIZE:(x+1)*BLOCK_SIZE])
-                ciphertext = array.array('B', ciphertext).tobytes()
+                ciphertext = array.array('B', ciphertext).tobytes() #last 6 bytes will be new key
+                hasher.update(ciphertext)
+                self.symmetricKey = ciphertext[len(ciphertext)-SYMMETRIC_KEY_SIZE:] 
+                print("Bob {0}: {1}".format(x,self.symmetricKey))
                 x = x + 1
                 #print("CIPHERTEXT OF STREAM: {0}".format(ciphertext))
                 out_file.write(ciphertext)
+                rc_cipher.changeKey(self.symmetricKey)
                 #hash ciphertext?
                 #change key?
             
-            ciphertext = rc_cipher.run(plaintext[x*BLOCK_SIZE:])
+            ciphertext = rc_cipher.run(plaintext[x*BLOCK_SIZE: len(plaintext) - SHA384_SIZE]) #is -1 correct?
             ciphertext = array.array('B', ciphertext).tobytes()
+            hasher.update(ciphertext)
+            endhash = plaintext[len(plaintext) - SHA384_SIZE:]
+            print("THIS HASHES DIGEST {0}".format(hasher.digest()))
+            print("DIGEST OF ALICE'S HASH {0}".format(endhash))
+            
             #print("RC4 CIPHERTEXT: {0}".format(ciphertext))
             out_file.write(ciphertext)
             out_file.close()
