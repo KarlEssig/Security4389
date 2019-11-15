@@ -90,7 +90,7 @@ class Alice():
                 hasher.update(message)
                 ciphertext = rc_cipher.run(message)
                 ciphertext = array.array('B', ciphertext).tobytes()
-                print("Alice {0}: {1}".format(x,self.symmetricKey))
+                #print("Alice {0}: {1}".format(x,self.symmetricKey))
                 x = x + 1
                
                 out_file.write(ciphertext)

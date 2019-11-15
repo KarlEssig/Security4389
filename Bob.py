@@ -69,7 +69,7 @@ class Bob():
                 ciphertext = array.array('B', ciphertext).tobytes() #last 6 bytes will be new key
                 hasher.update(ciphertext)
                 self.symmetricKey = ciphertext[len(ciphertext)-SYMMETRIC_KEY_SIZE:] 
-                print("Bob {0}: {1}".format(x,self.symmetricKey))
+                #print("Bob {0}: {1}".format(x,self.symmetricKey))
                 x = x + 1
                 #print("CIPHERTEXT OF STREAM: {0}".format(ciphertext))
                 out_file.write(ciphertext)
@@ -81,8 +81,8 @@ class Bob():
             ciphertext = array.array('B', ciphertext).tobytes()
             hasher.update(ciphertext)
             endhash = plaintext[len(plaintext) - SHA384_SIZE:]
-            print("THIS HASHES DIGEST {0}".format(hasher.digest()))
-            print("DIGEST OF ALICE'S HASH {0}".format(endhash))
+            #print("THIS HASHES DIGEST {0}".format(hasher.digest()))
+            #print("DIGEST OF ALICE'S HASH {0}".format(endhash))
             
             #print("RC4 CIPHERTEXT: {0}".format(ciphertext))
             out_file.write(ciphertext)

@@ -104,8 +104,8 @@ def demo(options):
     firstAliceFile = open(firstAlice, "wb")
     firstAliceFile.write(message)
     firstAliceFile.close()
-    print("Press any key to proceed")
-    input()
+    #print("Press any key to proceed")
+    #input()
     
     secondAlice = "aliceMessageCiphertext.bin"
     print("MESSAGE CIPHERTEXT - ALICE WRITTEN TO {0}".format(secondAlice))
@@ -113,8 +113,8 @@ def demo(options):
     secondAliceFile = open(secondAlice, "wb")
     secondAliceFile.write(ciphertext)
     secondAliceFile.close()
-    print("Press any key to proceed")
-    input()
+    #print("Press any key to proceed")
+    #input()
     
     firstBob = "bobMessagePlaintext.bin"
     print("MESSAGE PLAINTEXT - BOB WRITTEN TO {0}".format(firstBob))
@@ -122,8 +122,8 @@ def demo(options):
     firstBobFile = open(firstBob, "wb")
     firstBobFile.write(plaintext)
     firstBobFile.close()
-    print("Press any key to proceed")
-    input()
+    #print("Press any key to proceed")
+    #input()
     
     secondBob = "bobMessageCiphertext.bin"      
     print("MESSAGE CIPHERTEXT - BOB WRITTEN TO {0}".format(secondBob))
@@ -131,8 +131,8 @@ def demo(options):
     secondBobFile = open(secondBob, "wb")
     secondBobFile.write(ciphertext)
     secondBobFile.close()
-    print("Press any key to proceed")
-    input()
+    #print("Press any key to proceed")
+    #input()
     
     
     thirdAlice = "aliceMessagePlaintext2.bin"
@@ -141,8 +141,8 @@ def demo(options):
     thirdAliceFile = open(thirdAlice, "wb")
     thirdAliceFile.write(plaintext)
     thirdAliceFile.close()
-    print("Press any key to proceed")
-    input()
+    #print("Press any key to proceed")
+    #input()
     
 
     
