@@ -87,6 +87,7 @@ class Bob():
             #print("RC4 CIPHERTEXT: {0}".format(ciphertext))
             out_file.write(ciphertext)
             out_file.close()
+            self.validateDigest(endhash, hasher.digest())
         else:
             print("Unable to communicate")
         
@@ -104,6 +105,12 @@ class Bob():
         if difftime[0] & 0xFF or difftime[1] & 0xFF or difftime[2] & 0xFF or difftime[3]  > 16:
             print("Could not validate timestamp")
             self.communicate_flag = False
+    
+    def validateDigest(self, hash1, hash2):
+        if (hash1 == hash2):
+            print("Hash match")
+        else:
+            print("Hash mismatch")
         
             
     
