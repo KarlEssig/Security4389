@@ -7,7 +7,8 @@ from RC4 import RC4
 import array
 from Crypto.Hash import SHA384
 #CONSTANTS HAS TO BE THE SAME AS ALICE.PY
-SYMMETRIC_KEY_SIZE = 16 
+SYMMETRIC_KEY_SIZE = 16
+MASTER_KEY_SIZE = 16
 NONCE_SIZE = 6
 BLOCK_SIZE = 65536
 SHA384_SIZE = 48
@@ -19,7 +20,8 @@ class Bob():
         self.senderpublickey = None
         self.nonce = None
         self.communicate_flag = True
-    
+        self.masterKey = None
+        
     def decryptRSA(self, ciphertext):
         #cipher_rsa2 = PKCS1_OAEP.new(self.senderpublickey)
         cipher_rsa = PKCS1_OAEP.new(self.key)
@@ -27,7 +29,8 @@ class Bob():
         plaintext = cipher_rsa.decrypt(ciphertext)
         self.nonce = plaintext[:NONCE_SIZE]
         self.symmetricKey = plaintext[NONCE_SIZE:SYMMETRIC_KEY_SIZE+NONCE_SIZE]
-        timestamp = plaintext[SYMMETRIC_KEY_SIZE+NONCE_SIZE:]
+        self.masterKey = plaintext[NONCE_SIZE+SYMMETRIC_KEY_SIZE:NONCE_SIZE+SYMMETRIC_KEY_SIZE+MASTER_KEY_SIZE]
+        timestamp = plaintext[MASTER_KEY_SIZE+SYMMETRIC_KEY_SIZE+NONCE_SIZE:]
         self.validate(timestamp)    
         return plaintext
             
@@ -36,7 +39,7 @@ class Bob():
         if self.communicate_flag:
             self.nonceAddOne()
             timestamp = self.generateTimeStamp()
-            message = self.nonce + self.symmetricKey + timestamp
+            message = self.nonce + self.symmetricKey + self.masterKey + timestamp
             #print(message)
             cipher_rsa = PKCS1_OAEP.new(self.senderpublickey)
             ciphertext = cipher_rsa.encrypt(message)  
@@ -60,20 +63,27 @@ class Bob():
         #print("PLAINTEXT OF STREAM: {0}".format(plaintext))
         if self.communicate_flag:
             rc_cipher = RC4(self.symmetricKey)
+            master_cipher = RC4(self.masterKey)
             x = 0 #chunk number
             out_file = open(outputfilename, "wb")
             hasher = SHA384.new()
             while (x+1)* BLOCK_SIZE< len(plaintext):
                 
-                ciphertext = rc_cipher.run(plaintext[x*BLOCK_SIZE:(x+1)*BLOCK_SIZE])
+                ciphertext = rc_cipher.run(plaintext[x*(BLOCK_SIZE):(x+1)*(BLOCK_SIZE) - SYMMETRIC_KEY_SIZE])
+                #if(x == 1):
+                #    print("CIPHERTEXT OF STREAM: {0}".format(ciphertext))
+                cipherkey = master_cipher.run(plaintext[(x+1)*BLOCK_SIZE-SYMMETRIC_KEY_SIZE:(x+1)*BLOCK_SIZE])
                 ciphertext = array.array('B', ciphertext).tobytes() #last 6 bytes will be new key
-                hasher.update(ciphertext)
-                self.symmetricKey = ciphertext[len(ciphertext)-SYMMETRIC_KEY_SIZE:] 
-                #print("Bob {0}: {1}".format(x,self.symmetricKey))
+                cipherkey = array.array('B', cipherkey).tobytes()
+                hasher.update(ciphertext + cipherkey)
+                self.symmetricKey = cipherkey #ciphertext[len(ciphertext)-SYMMETRIC_KEY_SIZE:] 
+                print("Bob {0}: {1}".format(x,self.symmetricKey))
                 x = x + 1
                 #print("CIPHERTEXT OF STREAM: {0}".format(ciphertext))
+                ciphertext = ciphertext + cipherkey
                 out_file.write(ciphertext)
                 rc_cipher.changeKey(self.symmetricKey)
+                print("RC CIPHER {0}: {1}".format(x,rc_cipher.getKey()))
                 #hash ciphertext?
                 #change key?
             

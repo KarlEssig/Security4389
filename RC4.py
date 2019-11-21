@@ -66,6 +66,9 @@ class RC4():
     def changeKey(self, key):
         self.key = key
         #self.KSA()
+    
+    def getKey(self):
+        return self.key
         
     def toString(self):
         print("INFO ON RC4\nKEY = {0}\nCIPHERTEXT = {1}\nPLAINTEXT = {2}\nSARRAY = {3}".format(self.key, self.ciphertext, self.plaintext, self.s))

@@ -9,6 +9,7 @@ import array
 from Crypto.Hash import SHA384
 #CONSTANTS HAS TO BE THE SAME AS BOB.PY
 SYMMETRIC_KEY_SIZE = 16 
+MASTER_KEY_SIZE = 16
 NONCE_SIZE = 6
 BLOCK_SIZE = 65536
 SHA1_SIZE = 20
@@ -19,13 +20,14 @@ class Alice():
         self.nonce = get_random_bytes(NONCE_SIZE)#self.generateNonce()
         self.timestamp = self.generateTimeStamp()
         self.symmetricKey = get_random_bytes(SYMMETRIC_KEY_SIZE)#self.generateSymmetricKey()
+        self.masterKey = get_random_bytes(MASTER_KEY_SIZE)
         self.key = rsaKeyObject
         self.recieverpublickey = None
         self.communicate_flag = True
     
     
     def convertForRSA(self):
-        message = self.nonce + self.symmetricKey + self.timestamp
+        message = self.nonce + self.symmetricKey + self.masterKey + self.timestamp
         return message
     
     def decryptRSA(self, ciphertext):
@@ -35,7 +37,7 @@ class Alice():
         plaintext = cipher_rsa.decrypt(ciphertext)
         sentnonce = plaintext[:NONCE_SIZE]
         self.symmetricKey = plaintext[NONCE_SIZE:SYMMETRIC_KEY_SIZE+NONCE_SIZE]
-        timestamp = plaintext[SYMMETRIC_KEY_SIZE+NONCE_SIZE:]
+        timestamp = plaintext[MASTER_KEY_SIZE+SYMMETRIC_KEY_SIZE+NONCE_SIZE:]
         self.nonceAddOne()
         self.validate(timestamp, sentnonce)    
             #respond
@@ -80,23 +82,26 @@ class Alice():
     def startRC4(self, plaintext, outputfilename): #possibly input a filestream
         if self.communicate_flag:
             rc_cipher = RC4(self.symmetricKey)
+            master_cipher = RC4(self.masterKey)
             x = 0 #chunk number
             out_file = open(outputfilename, "wb")
             hasher = SHA384.new()
             while (x+1)* (BLOCK_SIZE - SYMMETRIC_KEY_SIZE)< len(plaintext):
                 self.symmetricKey = get_random_bytes(SYMMETRIC_KEY_SIZE) # New key to be used, should this be done?
                 
-                message = plaintext[x*(BLOCK_SIZE-SYMMETRIC_KEY_SIZE):(x+1)*(BLOCK_SIZE-SYMMETRIC_KEY_SIZE)] + self.symmetricKey
-                hasher.update(message)
-                ciphertext = rc_cipher.run(message)
-                ciphertext = array.array('B', ciphertext).tobytes()
-                #print("Alice {0}: {1}".format(x,self.symmetricKey))
+                message = plaintext[x*(BLOCK_SIZE-SYMMETRIC_KEY_SIZE):(x+1)*(BLOCK_SIZE-SYMMETRIC_KEY_SIZE)]
+                hasher.update(message + self.symmetricKey)   
+                ciphermessage = rc_cipher.run(message)
+                ciphermessage = array.array('B', ciphermessage).tobytes()
+                cipherkey = master_cipher.run(self.symmetricKey)
+                cipherkey = array.array('B', cipherkey).tobytes()
+                print("Alice {0}: {1}".format(x,self.symmetricKey))
                 x = x + 1
-               
+                ciphertext = ciphermessage + cipherkey
                 out_file.write(ciphertext)
                 
                 rc_cipher.changeKey(self.symmetricKey)
-                
+                print("RC CIPHER {0}: {1}".format(x,rc_cipher.getKey()))
             
             #self.symmetricKey = get_random_bytes(SYMMETRIC_KEY_SIZE)  #!! Don't need to have a new key at the end of the message
             message = plaintext[x*(BLOCK_SIZE-SYMMETRIC_KEY_SIZE):]
